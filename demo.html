@@ -39,6 +39,8 @@
   --dept-council:#2b4c6f;
   --dept-nhs:#005eb8;
   --dept-ea:#00a33b;
+  --dept-mod:#4d2942;
+  --dept-dcms:#d40072;
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -535,7 +537,7 @@ button{font-family:inherit}
   </header>
   <div class="phase">
     <span class="tag tag--purple">Demo</span>
-    <span>Demo — pre-set with example follows and a York postcode. Content loads live from official open APIs where this host allows; otherwise clearly-marked example content is shown.</span>
+    <span>Demo — answer the setup questions and the app builds your feed live from official open APIs: GOV.UK, Parliament, the Environment Agency, postcodes.io and council planning registers.</span>
   </div>
 
   <!-- ================= Onboarding ================= -->
@@ -560,9 +562,9 @@ button{font-family:inherit}
         <button class="topic" aria-pressed="false"><span class="box"></span>Local Government</button>
       </div>
 
-      <label class="field-label" for="postcode">Your postcode <span style="font-weight:400;color:var(--govuk-secondary-text)">(optional)</span></label>
-      <p class="field-hint">Used to find your MP, council and local consultations. Stays on your device.</p>
-      <input class="text-input" id="postcode" inputmode="text" autocomplete="postal-code" value="YO24 1AB" style="max-width:180px">
+      <label class="field-label" for="postcode">What is your postcode? <span style="font-weight:400;color:var(--govuk-secondary-text)">(optional)</span></label>
+      <p class="field-hint">Used to find your MP, council and local area — live from postcodes.io and parliament.uk. Stays on this device.</p>
+      <input class="text-input" id="postcode" inputmode="text" autocomplete="postal-code" placeholder="e.g. YO24 1AB" style="max-width:180px">
 
       <p class="onb-preview" id="onb-preview">Based on your choices, Your GOV.UK will follow the departments, Bills and consultations that lead on those topics, and your constituency.</p>
 
@@ -631,7 +633,7 @@ button{font-family:inherit}
       <div id="alerts-list"></div>
 
       <div class="search-hint">
-        Real-time alerts need the app&rsquo;s backend. The alerts above are <strong>examples</strong> showing how your &lsquo;Notify me when&hellip;&rsquo; choices (saved on this device) would surface here in the full app.
+        Alerts are assembled <strong>live from open APIs</strong> each time you open the demo. In the full app they&rsquo;d be pushed to you, driven by your &lsquo;Notify me when&hellip;&rsquo; choices (saved on this device). Items tagged Example appear only where live data is unavailable.
       </div>
     </div>
   </main>
@@ -1376,6 +1378,7 @@ button{font-family:inherit}
         saveStore();
         renderYourArea(area);
         fetchLocal(area);
+        renderAlerts(); // area now known: add the flood check and planning activity
       })
       .catch(function(){ renderAreaFallback(); });
   }
@@ -1483,12 +1486,40 @@ button{font-family:inherit}
       }).catch(function(){});
   }
 
-  // ============ Demo layer: seeded persona, live topic feed, example fallbacks ============
-  var FEED_SOURCES = [
-    {name:'Department for Transport', slug:'department-for-transport', badge:'DfT', color:'var(--dept-dft)', sub:'Ministerial department · leads on Railways'},
-    {name:'Department for Science, Innovation and Technology', slug:'department-for-science-innovation-and-technology', badge:'DSIT', color:'var(--dept-dsit)', sub:'Ministerial department · leads on Artificial Intelligence'},
-    {name:'Environment Agency', slug:'environment-agency', badge:'EA', color:'var(--dept-ea)', sub:'Public body · leads on Environment'}
-  ];
+  // ============ Demo layer: live topic feed, live alerts, example fallbacks ============
+  // Each onboarding topic maps to the real department(s) that lead on it; the feed
+  // and alerts are then fetched live from those organisations' GOV.UK publications.
+  var ORGS = {
+    dft:  {name:'Department for Transport', slug:'department-for-transport', badge:'DfT', color:'var(--dept-dft)', kind:'Ministerial department'},
+    dsit: {name:'Department for Science, Innovation and Technology', slug:'department-for-science-innovation-and-technology', badge:'DSIT', color:'var(--dept-dsit)', kind:'Ministerial department'},
+    mod:  {name:'Ministry of Defence', slug:'ministry-of-defence', badge:'MOD', color:'var(--dept-mod)', kind:'Ministerial department'},
+    mhclg:{name:'Ministry of Housing, Communities and Local Government', slug:'ministry-of-housing-communities-and-local-government', badge:'MHCLG', color:'var(--dept-mhclg)', kind:'Ministerial department'},
+    dcms: {name:'Department for Culture, Media and Sport', slug:'department-for-culture-media-and-sport', badge:'DCMS', color:'var(--dept-dcms)', kind:'Ministerial department'},
+    defra:{name:'Department for Environment, Food and Rural Affairs', slug:'department-for-environment-food-rural-affairs', badge:'Defra', color:'var(--dept-defra)', kind:'Ministerial department'},
+    ea:   {name:'Environment Agency', slug:'environment-agency', badge:'EA', color:'var(--dept-ea)', kind:'Public body'},
+    uksa: {name:'UK Space Agency', slug:'uk-space-agency', badge:'UKSA', color:'var(--dept-dsit)', kind:'Executive agency'}
+  };
+  var TOPIC_ORGS = {
+    'Railways':['dft'], 'Science':['dsit'], 'Artificial Intelligence':['dsit'], 'Defence':['mod'],
+    'Planning':['mhclg'], 'Culture':['dcms'], 'Heritage':['dcms'], 'Broadband':['dsit'],
+    'Space':['uksa'], 'Environment':['defra','ea'], 'Housing':['mhclg'], 'Local Government':['mhclg']
+  };
+
+  // Deduped lead organisations for the chosen topics, each with a subtitle naming those topics
+  function orgsForTopics(topics){
+    var picked = {}, order = [];
+    (topics || []).forEach(function(tp){
+      (TOPIC_ORGS[tp] || []).forEach(function(k){
+        if(!picked[k]){ picked[k] = []; order.push(k); }
+        picked[k].push(tp);
+      });
+    });
+    return order.map(function(k){
+      var o = Object.assign({}, ORGS[k]);
+      o.sub = o.kind + ' · leads on ' + picked[k].join(', ');
+      return o;
+    });
+  }
 
   function feedCard(src, r){
     var item = govukItem(r, 'GOV.UK publications and news', 'GOV.UK content', src.color);
@@ -1522,9 +1553,9 @@ button{font-family:inherit}
 
   // Fallback cards for hosts that block external requests — every one is labelled Example
   var DEMO_FEED = [
-    {src: FEED_SOURCES[0], type:'News story', title:'Example: Timetable improvements announced for rail routes in the north of England', sum:'An illustrative example of a Department for Transport news story matching your Railways topic.', url:'https://www.gov.uk/government/organisations/department-for-transport'},
-    {src: FEED_SOURCES[1], type:'Open consultation', title:'Example: Consultation opens on the use of AI in public services', sum:'An illustrative example of a DSIT consultation matching your Artificial Intelligence topic.', url:'https://www.gov.uk/government/organisations/department-for-science-innovation-and-technology'},
-    {src: FEED_SOURCES[2], type:'Official statistics', title:'Example: Monthly water situation report for England published', sum:'An illustrative example of an Environment Agency publication matching your Environment topic.', url:'https://www.gov.uk/government/organisations/environment-agency'}
+    {src: ORGS.dft, type:'News story', title:'Example: Timetable improvements announced for rail routes in the north of England', sum:'An illustrative example of a Department for Transport news story matching your Railways topic.', url:'https://www.gov.uk/government/organisations/department-for-transport'},
+    {src: ORGS.dsit, type:'Open consultation', title:'Example: Consultation opens on the use of AI in public services', sum:'An illustrative example of a DSIT consultation matching your Artificial Intelligence topic.', url:'https://www.gov.uk/government/organisations/department-for-science-innovation-and-technology'},
+    {src: ORGS.ea, type:'Official statistics', title:'Example: Monthly water situation report for England published', sum:'An illustrative example of an Environment Agency publication matching your Environment topic.', url:'https://www.gov.uk/government/organisations/environment-agency'}
   ];
 
   function demoFeedCard(d){
@@ -1567,13 +1598,28 @@ button{font-family:inherit}
 
   function fetchTopicFeed(){
     var box = document.getElementById('topic-feed');
+    var sources = orgsForTopics(store.topics);
     box.textContent = '';
+    if(sources.length === 0){
+      var card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML =
+        '<h3 style="font-size:17px;margin:0 0 6px">Pick topics to build your feed</h3>' +
+        '<p class="summary" style="margin:0 0 12px">Choose what you care about and the feed fills with the latest from the departments that lead on it — live from GOV.UK.</p>' +
+        '<button class="govuk-button govuk-button--secondary" style="width:auto;margin:0;font-size:15px;padding:8px 14px">Choose topics</button>';
+      card.querySelector('button').addEventListener('click', function(){
+        document.getElementById('onboarding').classList.remove('hidden');
+      });
+      box.appendChild(card);
+      return;
+    }
     var loading = document.createElement('p');
     loading.className = 'divider-note';
     loading.textContent = 'Loading the latest from what you follow…';
     box.appendChild(loading);
-    Promise.allSettled(FEED_SOURCES.map(function(src){
-      return fetchJson('https://www.gov.uk/api/search.json?count=3&order=-public_timestamp&filter_organisations=' + src.slug)
+    var perOrg = sources.length >= 4 ? 2 : 3;
+    Promise.allSettled(sources.map(function(src){
+      return fetchJson('https://www.gov.uk/api/search.json?count=' + perOrg + '&order=-public_timestamp&filter_organisations=' + src.slug)
         .then(function(data){
           return (data.results || []).map(function(r){ return {src: src, r: r}; });
         });
@@ -1586,55 +1632,123 @@ button{font-family:inherit}
       box.textContent = '';
       if(failures === outcomes.length){ renderDemoFeed(box); return; }
       rows.sort(function(a, b){ return (b.r.public_timestamp || '').localeCompare(a.r.public_timestamp || ''); });
-      rows.slice(0, 8).forEach(function(row){ box.appendChild(feedCard(row.src, row.r)); });
+      rows.slice(0, 10).forEach(function(row){ box.appendChild(feedCard(row.src, row.r)); });
     });
   }
 
-  // Shown only when the live postcode lookup is unavailable: factual place data, no invented MP
+  // Shown only when the live postcode lookup is unavailable: no invented MP or place data
   function renderAreaFallback(){
     var box = document.getElementById('your-area');
+    var pc = store.postcode || 'your postcode';
     box.textContent = '';
     var card = document.createElement('article');
     card.className = 'card';
     card.style.setProperty('--dept', 'var(--dept-council)');
     card.innerHTML =
       '<div class="card-src"><span class="badge" aria-hidden="true">You</span>' +
-      '<span class="src-text"><span class="src-name">Your area · YO24 1AB (demo postcode)</span><br>' +
-      '<span class="src-meta">Example — live lookup is blocked on this host</span></span>' +
+      '<span class="src-text"><span class="src-name"></span><br>' +
+      '<span class="src-meta">Live lookup unavailable on this host</span></span>' +
       '<span class="card-type">Your area</span></div>' +
-      '<h3>York Central</h3>' +
-      '<p class="summary">Constituency: York Central · Council: City of York. On a normal web host this card looks up your real MP, flood alerts and nearby planning applications, live.</p>' +
+      '<p class="summary">This host blocks the live postcode lookup, so your MP, constituency and council can&rsquo;t be shown here. Open the demo on a normal web host and this card fills in live from postcodes.io and parliament.uk.</p>' +
       '<div class="card-foot"><a class="src-link" href="https://members.parliament.uk/members/commons" target="_blank" rel="noopener">Find your MP on parliament.uk</a></div>';
+    card.querySelector('.src-name').textContent = 'Your area · ' + pc;
     box.appendChild(card);
   }
 
-  var DEMO_ALERTS = [
-    {t:'Department for Transport published new content', m:'Because you follow Department for Transport'},
-    {t:'A consultation on Artificial Intelligence closes in 7 days', m:'Because you follow the Artificial Intelligence topic'},
-    {t:'New planning application within 1.5 km of YO24 1AB', m:'Because you added your postcode'},
-    {t:'Flood alert issued for your area', m:'Environment Agency warning information for your postcode'}
-  ];
+  function alertCard(al){
+    var mc = document.createElement('div');
+    mc.className = 'mini-card';
+    var row = document.createElement('div');
+    row.className = 'tag-row';
+    row.style.margin = '0 0 6px';
+    var tag = document.createElement('span');
+    tag.className = 'tag ' + (al.live ? 'tag--green' : 'tag--yellow');
+    tag.textContent = al.live ? 'Live' : 'Example';
+    row.appendChild(tag);
+    var h4 = document.createElement('h4');
+    h4.textContent = al.t;
+    var m = document.createElement('span');
+    m.className = 'm-meta';
+    m.textContent = al.m;
+    if(al.url){
+      m.appendChild(document.createTextNode(' · '));
+      var a = document.createElement('a');
+      a.href = al.url; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = 'View';
+      m.appendChild(a);
+    }
+    mc.appendChild(row); mc.appendChild(h4); mc.appendChild(m);
+    return mc;
+  }
 
+  function renderExampleAlerts(box, pc){
+    [
+      {t:'A department you follow published new content', m:'Because of your topic choices'},
+      {t:'A consultation you follow closes in 7 days', m:'Because you follow it'},
+      {t:'New planning application near ' + pc, m:'Because you added your postcode'},
+      {t:'Flood alert issued for your area', m:'Environment Agency warning information for your postcode'}
+    ].forEach(function(al){ box.appendChild(alertCard(al)); });
+  }
+
+  // Alerts are assembled live on each visit: the newest publication from every followed
+  // department, an Environment Agency flood check, and nearby planning activity.
+  // Some open APIs (PlanIt especially) can hang rather than fail, so every job gets a
+  // timeout and alerts render progressively as each source answers.
+  var alertsSeq = 0;
+  function withTimeout(p, ms){
+    return Promise.race([p, new Promise(function(ignore, reject){
+      setTimeout(function(){ reject(new Error('timeout')); }, ms);
+    })]);
+  }
   function renderAlerts(){
     var box = document.getElementById('alerts-list');
     box.textContent = '';
-    DEMO_ALERTS.forEach(function(al){
-      var mc = document.createElement('div');
-      mc.className = 'mini-card';
-      var row = document.createElement('div');
-      row.className = 'tag-row';
-      row.style.margin = '0 0 6px';
-      var tag = document.createElement('span');
-      tag.className = 'tag tag--yellow';
-      tag.textContent = 'Example';
-      row.appendChild(tag);
-      var h4 = document.createElement('h4');
-      h4.textContent = al.t;
-      var m = document.createElement('span');
-      m.className = 'm-meta';
-      m.textContent = al.m;
-      mc.appendChild(row); mc.appendChild(h4); mc.appendChild(m);
-      box.appendChild(mc);
+    var pc = (store.area && store.area.postcode) || store.postcode || 'your postcode';
+    var jobs = orgsForTopics(store.topics).slice(0, 5).map(function(o){
+      return fetchJson('https://www.gov.uk/api/search.json?count=1&order=-public_timestamp&filter_organisations=' + o.slug)
+        .then(function(d){
+          var r = (d.results || [])[0];
+          if(!r) return null;
+          return {live:true, t: o.name + ' published: ' + trunc(r.title, 90),
+                  m: 'Live · ' + fmtDate(r.public_timestamp) + ' · because you follow ' + o.name,
+                  url: 'https://www.gov.uk' + r.link};
+        });
+    });
+    var a = store.area;
+    if(a && a.lat != null){
+      jobs.push(fetchJson('https://environment.data.gov.uk/flood-monitoring/id/floods?lat=' + a.lat + '&long=' + a.lng + '&dist=15')
+        .then(function(res){
+          var items = (res.items || []).filter(function(i){ return i.severityLevel <= 3; });
+          return items.length
+            ? {live:true, t: (items[0].severityLevel <= 2 ? 'Flood warning: ' : 'Flood alert: ') + (items[0].description || 'near you'),
+               m: 'Live · Environment Agency · because you added ' + pc, url: 'https://check-for-flooding.service.gov.uk/'}
+            : {live:true, t: 'No flood alerts near ' + pc + ' right now',
+               m: 'Live check · Environment Agency flood-monitoring API'};
+        }));
+      jobs.push(fetchJson('https://www.planit.org.uk/api/applics/json?krad=1.5&lat=' + a.lat + '&lng=' + a.lng + '&pg_sz=10&recent=60')
+        .then(function(res){
+          var n = res.total || (res.records || []).length;
+          if(!n) return null;
+          return {live:true, t: n + ' planning application' + (n === 1 ? '' : 's') + ' opened near ' + pc + ' in the last 60 days',
+                  m: 'Live · council planning registers via PlanIt', url: 'https://www.planit.org.uk/'};
+        }));
+    }
+    if(jobs.length === 0){ renderExampleAlerts(box, pc); return; }
+    var seq = ++alertsSeq;
+    var guarded = jobs.map(function(job){
+      return withTimeout(job, 8000)
+        .then(function(al){
+          if(al && seq === alertsSeq) box.appendChild(alertCard(al));
+          return al || null;
+        })
+        .catch(function(){ return null; });
+    });
+    Promise.all(guarded).then(function(vals){
+      if(seq !== alertsSeq) return;
+      if(!vals.some(function(v){ return v; })){
+        box.textContent = '';
+        renderExampleAlerts(box, pc);
+      }
     });
   }
 
@@ -1655,8 +1769,14 @@ button{font-family:inherit}
     store.topics = Array.prototype.map.call(document.querySelectorAll('.topic[aria-pressed="true"]'), function(t){ return t.textContent.trim(); });
     var pc = document.getElementById('postcode').value.trim();
     store.postcode = pc;
+    orgsForTopics(store.topics).forEach(function(o){
+      followed.add(o.name);
+      entityInfo[o.name] = {s: o.sub};
+    });
     saveStore();
     if(POSTCODE_RE.test(pc)) resolveArea(pc);
+    fetchTopicFeed();
+    renderAlerts();
   });
   document.getElementById('onb-skip').addEventListener('click', function(){
     document.getElementById('onboarding').classList.add('hidden');
@@ -1668,16 +1788,8 @@ button{font-family:inherit}
     document.getElementById('onboarding').classList.remove('hidden');
   });
 
-  // Restore saved state; on first run, seed the demo persona instead of showing onboarding
+  // Restore saved state; on first run the onboarding questions show (topics + postcode)
   try { store = JSON.parse(localStorage.getItem('yourgovuk-demo-v1') || '{}') || {}; } catch(e){ store = {}; }
-  if(!store.onboarded){
-    store = {
-      onboarded: true,
-      topics: ['Railways', 'Artificial Intelligence', 'Planning', 'Environment'],
-      postcode: 'YO24 1AB',
-      follows: FEED_SOURCES.map(function(s){ return {t: s.name, s: s.sub}; })
-    };
-  }
   Object.assign(notifyPrefs, store.notifyPrefs || {});
   (store.follows || []).forEach(function(f){
     followed.add(f.t);
