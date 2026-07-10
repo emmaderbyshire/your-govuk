@@ -823,12 +823,25 @@ button{font-family:inherit}
     onbPreview.appendChild(b);
     onbPreview.appendChild(document.createTextNode(' — plus the departments, Bills and consultations that lead on ' + (names.length === 1 ? 'it' : 'them') + ', and your constituency.'));
   }
+  // Setup answers are saved as they're given, so closing the tab mid-setup loses nothing
+  function collectDraft(){
+    return {
+      topics: Array.prototype.map.call(document.querySelectorAll('.topic[aria-pressed="true"]'), function(t){ return t.textContent.trim(); }),
+      postcode: document.getElementById('postcode').value.trim()
+    };
+  }
   document.querySelectorAll('.topic').forEach(function(t){
     t.addEventListener('click', function(){
       var on = t.getAttribute('aria-pressed') === 'true';
       t.setAttribute('aria-pressed', on ? 'false' : 'true');
       updateOnbPreview();
+      store.draft = collectDraft();
+      saveStore();
     });
+  });
+  document.getElementById('postcode').addEventListener('input', function(){
+    store.draft = collectDraft();
+    saveStore();
   });
   updateOnbPreview();
 
@@ -1780,6 +1793,7 @@ button{font-family:inherit}
       followed.add(o.name);
       entityInfo[o.name] = {s: o.sub};
     });
+    delete store.draft; // answers are now committed as topics/postcode
     saveStore();
     if(POSTCODE_RE.test(pc)) resolveArea(pc);
     fetchTopicFeed();
@@ -1809,6 +1823,18 @@ button{font-family:inherit}
     updateOnbPreview();
   }
   if(store.postcode){ document.getElementById('postcode').value = store.postcode; }
+  // Unfinished setup: restore the draft answers into the onboarding screen
+  if(!store.onboarded && store.draft){
+    if(store.draft.topics){
+      document.querySelectorAll('.topic').forEach(function(t){
+        t.setAttribute('aria-pressed', store.draft.topics.indexOf(t.textContent.trim()) > -1 ? 'true' : 'false');
+      });
+      updateOnbPreview();
+    }
+    if(store.draft.postcode && !store.postcode){
+      document.getElementById('postcode').value = store.draft.postcode;
+    }
+  }
   if(store.onboarded){ document.getElementById('onboarding').classList.add('hidden'); }
   if(store.area){ renderYourArea(store.area); fetchLocal(store.area); }
   else if(store.postcode && POSTCODE_RE.test(store.postcode)){ resolveArea(store.postcode); }
