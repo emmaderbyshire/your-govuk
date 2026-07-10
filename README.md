@@ -2,6 +2,8 @@
 
 A prototype of a personalised UK Government & Parliament feed app: follow departments, your MP, consultations and your local area, and see what they do — live from official open APIs, with no scraping and no commentary.
 
+**Try the demo: <https://emmaderbyshire.github.io/your-govuk/>**
+
 Everything shown is fetched directly from the browser:
 
 - **GOV.UK Search & Content APIs** — publications, news, consultations, organisations, verified social channels
@@ -18,7 +20,7 @@ Bills, Hansard and Committees APIs don't send CORS headers, so a full app would 
 | --- | --- |
 | `govfeed-prototype.html` | The prototype. Starts with onboarding; everything rendered is live data or an honest empty state. |
 | `demo.html` | The demo build. Pre-seeded persona (York postcode, four topics, three follows) plus a live "latest from what you follow" feed. On hosts that block external requests it falls back to clearly-labelled example content. Append `?offline` to preview that mode; the header cog resets the demo. |
-| `index.html` | An earlier snapshot kept for reference. |
+| `index.html` | The GitHub Pages build of the demo — `demo.html` wrapped in a full HTML document. Regenerate it after editing `demo.html`. |
 | `.claude/serve.ps1` | Zero-dependency local server (PowerShell `HttpListener`, port 4173). `/demo` serves the demo, any other path serves the prototype. |
 
 ## Run it locally
