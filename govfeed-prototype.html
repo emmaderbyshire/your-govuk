@@ -1,0 +1,1515 @@
+<title>Your GOV.UK — prototype</title>
+<style>
+/* ============ GOV.UK-derived design tokens ============ */
+:root{
+  --govuk-text:#0b0c0c;
+  --govuk-secondary-text:#505a5f;
+  --govuk-link:#1d70b8;
+  --govuk-link-visited:#4c2c92;
+  --govuk-page:#f3f2f1;
+  --govuk-surface:#ffffff;
+  --govuk-border:#b1b4b6;
+  --govuk-border-light:#e5e4e2;
+  --govuk-green:#00703c;
+  --govuk-green-shadow:#002d18;
+  --govuk-red:#d4351c;
+  --govuk-yellow:#ffdd00;
+  --govuk-blue:#1d70b8;
+  --govuk-header:#0b0c0c;
+  --govuk-header-text:#ffffff;
+  --tag-blue-bg:#d2e2f1; --tag-blue-text:#0c2d4a;
+  --tag-green-bg:#cce2d8; --tag-green-text:#005a30;
+  --tag-red-bg:#f6d7d2;  --tag-red-text:#942514;
+  --tag-yellow-bg:#fff7bf; --tag-yellow-text:#594d00;
+  --tag-grey-bg:#e8e8e6;  --tag-grey-text:#383f43;
+  --tag-purple-bg:#dbd5e9; --tag-purple-text:#3d2375;
+  --focus:#ffdd00;
+  --shadow-card:none;
+  /* Official departmental identity colours (badges only) */
+  --dept-dft:#006853;
+  --dept-dsit:#00539f;
+  --dept-dhsc:#00ad93;
+  --dept-defra:#00a33b;
+  --dept-hmt:#af292e;
+  --dept-mhclg:#0096a6;
+  --dept-ho:#732282;
+  --dept-parliament:#373151;
+  --dept-commons:#006e46;
+  --dept-lords:#a3183c;
+  --dept-council:#2b4c6f;
+  --dept-nhs:#005eb8;
+  --dept-ea:#00a33b;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --govuk-text:#f3f2f1;
+    --govuk-secondary-text:#a7acb0;
+    --govuk-link:#7fb2de;
+    --govuk-link-visited:#bdaadb;
+    --govuk-page:#0b0c0c;
+    --govuk-surface:#161719;
+    --govuk-border:#3f4347;
+    --govuk-border-light:#2a2c2f;
+    --govuk-green:#008547;
+    --govuk-green-shadow:#00341c;
+    --govuk-header:#000000;
+    --govuk-header-text:#ffffff;
+    --tag-blue-bg:#123a5c; --tag-blue-text:#bcd8ef;
+    --tag-green-bg:#0d3b28; --tag-green-text:#b6dcc9;
+    --tag-red-bg:#54180e;  --tag-red-text:#f0b8ae;
+    --tag-yellow-bg:#4a4000; --tag-yellow-text:#f4e683;
+    --tag-grey-bg:#33363a;  --tag-grey-text:#cfd3d6;
+    --tag-purple-bg:#2e2152; --tag-purple-text:#cfc3ec;
+  }
+}
+:root[data-theme="light"]{
+  --govuk-text:#0b0c0c;
+  --govuk-secondary-text:#505a5f;
+  --govuk-link:#1d70b8;
+  --govuk-link-visited:#4c2c92;
+  --govuk-page:#f3f2f1;
+  --govuk-surface:#ffffff;
+  --govuk-border:#b1b4b6;
+  --govuk-border-light:#e5e4e2;
+  --govuk-green:#00703c;
+  --govuk-green-shadow:#002d18;
+  --govuk-header:#0b0c0c;
+  --govuk-header-text:#ffffff;
+  --tag-blue-bg:#d2e2f1; --tag-blue-text:#0c2d4a;
+  --tag-green-bg:#cce2d8; --tag-green-text:#005a30;
+  --tag-red-bg:#f6d7d2;  --tag-red-text:#942514;
+  --tag-yellow-bg:#fff7bf; --tag-yellow-text:#594d00;
+  --tag-grey-bg:#e8e8e6;  --tag-grey-text:#383f43;
+  --tag-purple-bg:#dbd5e9; --tag-purple-text:#3d2375;
+}
+:root[data-theme="dark"]{
+  --govuk-text:#f3f2f1;
+  --govuk-secondary-text:#a7acb0;
+  --govuk-link:#7fb2de;
+  --govuk-link-visited:#bdaadb;
+  --govuk-page:#0b0c0c;
+  --govuk-surface:#161719;
+  --govuk-border:#3f4347;
+  --govuk-border-light:#2a2c2f;
+  --govuk-green:#008547;
+  --govuk-green-shadow:#00341c;
+  --govuk-header:#000000;
+  --govuk-header-text:#ffffff;
+  --tag-blue-bg:#123a5c; --tag-blue-text:#bcd8ef;
+  --tag-green-bg:#0d3b28; --tag-green-text:#b6dcc9;
+  --tag-red-bg:#54180e;  --tag-red-text:#f0b8ae;
+  --tag-yellow-bg:#4a4000; --tag-yellow-text:#f4e683;
+  --tag-grey-bg:#33363a;  --tag-grey-text:#cfd3d6;
+  --tag-purple-bg:#2e2152; --tag-purple-text:#cfc3ec;
+}
+
+/* ============ Base ============ */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--govuk-page);
+  color:var(--govuk-text);
+  /* GDS Transport is licence-restricted; this is GOV.UK's documented fallback stack */
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:16px;
+  line-height:1.4;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--govuk-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{text-decoration-thickness:3px}
+button{font-family:inherit}
+:focus-visible{
+  outline:3px solid var(--focus);
+  outline-offset:0;
+  box-shadow:0 0 0 6px rgba(11,12,12,.9);
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+/* ============ App frame ============ */
+.app{
+  max-width:430px;
+  margin:0 auto;
+  min-height:100dvh;
+  background:var(--govuk-page);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+@media (min-width:520px){
+  body{padding:24px 0}
+  .app{
+    min-height:calc(100dvh - 48px);
+    border:1px solid var(--govuk-border);
+    box-shadow:0 8px 32px rgba(11,12,12,.12);
+  }
+}
+
+/* ============ GOV.UK header ============ */
+.gov-header{
+  background:var(--govuk-header);
+  color:var(--govuk-header-text);
+  padding:12px 16px 10px;
+  border-bottom:6px solid var(--govuk-blue);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.gov-header .wordmark{
+  display:flex;align-items:center;gap:9px;
+  font-weight:700;font-size:22px;letter-spacing:-.2px;
+}
+.gov-header .wordmark svg{flex:none}
+.gov-header .strap{
+  font-size:12px;font-weight:400;color:#c9cccf;
+  display:block;letter-spacing:.2px;margin-top:1px;
+}
+.settings-btn{
+  background:none;border:none;color:var(--govuk-header-text);
+  padding:6px;cursor:pointer;display:flex;border-radius:0;
+}
+
+/* Phase banner */
+.phase{
+  background:var(--govuk-surface);
+  border-bottom:1px solid var(--govuk-border);
+  padding:8px 16px;
+  font-size:13px;
+  color:var(--govuk-secondary-text);
+  display:flex;align-items:center;gap:10px;
+}
+.phase .tag{flex:none}
+
+/* ============ Tags ============ */
+.tag{
+  display:inline-block;
+  font-size:12px;font-weight:700;
+  letter-spacing:.6px;text-transform:uppercase;
+  padding:3px 8px 2px;
+  background:var(--tag-blue-bg);color:var(--tag-blue-text);
+  white-space:nowrap;
+}
+.tag--green{background:var(--tag-green-bg);color:var(--tag-green-text)}
+.tag--red{background:var(--tag-red-bg);color:var(--tag-red-text)}
+.tag--yellow{background:var(--tag-yellow-bg);color:var(--tag-yellow-text)}
+.tag--grey{background:var(--tag-grey-bg);color:var(--tag-grey-text)}
+.tag--purple{background:var(--tag-purple-bg);color:var(--tag-purple-text)}
+
+/* ============ Screens ============ */
+.screen{display:none;flex:1;padding-bottom:76px}
+.screen.active{display:block}
+.screen-inner{padding:16px}
+
+.screen-title{
+  font-size:27px;font-weight:700;line-height:1.15;
+  margin:4px 0 4px;text-wrap:balance;
+}
+.screen-lede{
+  font-size:15px;color:var(--govuk-secondary-text);
+  margin:0 0 16px;
+}
+
+/* Sub-screen top bar (back link) */
+.back-bar{padding:12px 16px 0}
+.back-link{
+  font-size:14px;color:var(--govuk-link);
+  background:none;border:none;padding:2px 0;cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.back-link::before{content:"";display:inline-block;width:7px;height:7px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:2px}
+
+/* ============ Cards ============ */
+.feed{display:flex;flex-direction:column;gap:12px;padding:0 16px 16px}
+.card{
+  background:var(--govuk-surface);
+  border:1px solid var(--govuk-border);
+  border-top:4px solid var(--dept,var(--govuk-blue));
+  padding:14px 16px 14px;
+}
+.card-src{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;
+}
+.badge{
+  flex:none;width:26px;height:26px;
+  background:var(--dept,var(--govuk-blue));
+  color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  letter-spacing:.3px;
+}
+.src-name{font-size:13px;font-weight:700}
+.src-meta{font-size:12.5px;color:var(--govuk-secondary-text)}
+.src-text{min-width:0}
+.card-type{
+  margin-left:auto;flex:none;
+  font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--govuk-secondary-text);
+}
+.card h3{
+  font-size:18px;line-height:1.25;font-weight:700;
+  margin:0 0 6px;text-wrap:balance;
+}
+.card h3 a{color:var(--govuk-text);text-decoration:none}
+.card h3 a:hover{color:var(--govuk-link);text-decoration:underline}
+.card p{font-size:15px;margin:0 0 10px;color:var(--govuk-text)}
+.card .summary{color:var(--govuk-secondary-text);font-size:14.5px}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.card-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-top:1px solid var(--govuk-border-light);
+  padding-top:10px;
+}
+.src-link{font-size:14px;font-weight:400}
+.follow-btn{
+  font-size:13px;font-weight:700;
+  padding:5px 12px;
+  background:var(--govuk-surface);
+  border:2px solid var(--govuk-text);
+  color:var(--govuk-text);
+  cursor:pointer;border-radius:0;
+}
+.follow-btn[aria-pressed="true"]{
+  background:var(--govuk-text);color:var(--govuk-surface);
+}
+.follow-btn[aria-pressed="true"]::before{content:"✓ "}
+
+/* Alert banner (emergency / flood) */
+.alert-banner{
+  border:4px solid var(--govuk-red);
+  background:var(--govuk-surface);
+  padding:12px 14px;
+}
+.alert-banner .alert-head{
+  color:var(--govuk-red);font-weight:700;font-size:14px;
+  text-transform:uppercase;letter-spacing:.6px;
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+}
+.alert-banner h3{margin:0 0 4px;font-size:17px}
+.alert-banner p{margin:0;font-size:14.5px}
+
+/* ============ Buttons ============ */
+.govuk-button{
+  display:inline-block;width:100%;
+  background:var(--govuk-green);color:#fff;
+  font-size:17px;font-weight:400;text-align:center;
+  padding:11px 16px 10px;
+  border:2px solid transparent;
+  box-shadow:0 2px 0 var(--govuk-green-shadow);
+  cursor:pointer;border-radius:0;
+  text-decoration:none;
+}
+.govuk-button:hover{filter:brightness(1.06)}
+.govuk-button:active{transform:translateY(2px);box-shadow:none}
+.govuk-button--secondary{
+  background:var(--tag-grey-bg);color:var(--govuk-text);
+  box-shadow:0 2px 0 var(--govuk-border);
+}
+
+/* ============ Onboarding ============ */
+#onboarding{
+  position:absolute;inset:0;z-index:30;
+  background:var(--govuk-page);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+#onboarding.hidden{display:none}
+.onb-body{padding:20px 16px 24px;flex:1}
+.onb-step{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--govuk-secondary-text);margin:0 0 6px}
+.onb-body h2{font-size:26px;line-height:1.15;margin:0 0 8px;text-wrap:balance}
+.onb-body>p{font-size:15px;color:var(--govuk-secondary-text);margin:0 0 18px;max-width:34ch}
+.topic-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 22px;
+}
+.topic{
+  display:flex;align-items:center;gap:10px;
+  background:var(--govuk-surface);
+  border:2px solid var(--govuk-border);
+  padding:11px 12px;
+  font-size:15px;font-weight:400;
+  cursor:pointer;text-align:left;color:var(--govuk-text);
+  border-radius:0;
+}
+.topic .box{
+  flex:none;width:20px;height:20px;
+  border:2px solid var(--govuk-text);
+  background:var(--govuk-surface);
+  display:flex;align-items:center;justify-content:center;
+}
+.topic[aria-pressed="true"]{border-color:var(--govuk-blue)}
+.topic[aria-pressed="true"] .box{background:var(--govuk-blue);border-color:var(--govuk-blue)}
+.topic[aria-pressed="true"] .box::after{
+  content:"";width:10px;height:5px;
+  border-left:2.5px solid #fff;border-bottom:2.5px solid #fff;
+  transform:rotate(-45deg) translate(0,-1px);
+}
+.field-label{display:block;font-weight:700;font-size:16px;margin:0 0 4px}
+.field-hint{font-size:13.5px;color:var(--govuk-secondary-text);margin:0 0 8px}
+.text-input{
+  width:100%;font-size:17px;padding:9px 10px;
+  border:2px solid var(--govuk-text);
+  background:var(--govuk-surface);color:var(--govuk-text);
+  border-radius:0;
+}
+.onb-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.onb-preview{
+  margin-top:14px;font-size:13.5px;color:var(--govuk-secondary-text);
+  border-top:1px solid var(--govuk-border);padding-top:12px;
+}
+.onb-preview strong{color:var(--govuk-text)}
+
+/* ============ Search ============ */
+.search-box{display:flex;margin:0 0 14px}
+.search-box input{
+  flex:1;font-size:16px;padding:10px 12px;
+  border:2px solid var(--govuk-text);border-right:none;
+  background:var(--govuk-surface);color:var(--govuk-text);
+  border-radius:0;min-width:0;
+}
+.search-box button{
+  flex:none;width:46px;
+  background:var(--govuk-blue);border:2px solid var(--govuk-blue);
+  color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  border-radius:0;
+}
+.result-group{margin:0 0 18px}
+.result-group h3{
+  font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--govuk-secondary-text);margin:0 0 6px;
+}
+.result{
+  display:flex;align-items:center;
+  background:var(--govuk-surface);
+  border:1px solid var(--govuk-border);
+  border-bottom:none;
+}
+.result:last-child{border-bottom:1px solid var(--govuk-border)}
+.r-open{
+  flex:1;min-width:0;
+  display:flex;align-items:center;gap:10px;
+  background:none;border:none;border-radius:0;
+  padding:11px 12px;
+  text-align:left;cursor:pointer;
+  color:var(--govuk-text);font-size:15px;font-family:inherit;
+}
+.result .follow-btn{flex:none;margin-right:10px}
+.result .r-title{font-weight:700;display:block}
+.result .r-sub{font-size:13px;color:var(--govuk-secondary-text);display:block;margin-top:1px}
+.result .go{margin-left:auto;color:var(--govuk-secondary-text);flex:none}
+.search-count{font-size:13.5px;color:var(--govuk-secondary-text);margin:0 0 14px}
+.search-note{
+  font-size:13.5px;background:var(--tag-grey-bg);color:var(--tag-grey-text);
+  padding:8px 10px;margin:0 0 14px;
+  border-left:4px solid var(--govuk-border);
+}
+
+/* Per-object notification rules */
+.notify-details{margin:12px 0 0;border-top:1px solid var(--govuk-border-light);padding-top:8px}
+.notify-details summary{color:var(--govuk-link);cursor:pointer;font-size:14.5px;text-decoration:underline;text-underline-offset:2px}
+.notify-rows{margin-top:6px}
+.notify-row{display:flex;gap:10px;align-items:center;font-size:14.5px;padding:7px 0;border-bottom:1px solid var(--govuk-border-light);cursor:pointer}
+.notify-row input{width:18px;height:18px;accent-color:var(--govuk-blue);flex:none;margin:0}
+
+/* Official social channels (from GOV.UK Content API) */
+.chan-row{
+  display:flex;gap:10px;align-items:center;
+  font-size:14.5px;padding:8px 0;
+  border-bottom:1px solid var(--govuk-border-light);
+}
+.chan-row .tag{flex:none}
+
+.search-hint{font-size:14.5px;color:var(--govuk-secondary-text);border-top:1px solid var(--govuk-border);padding-top:14px}
+.search-hint ul{margin:8px 0 0;padding-left:20px}
+.search-hint li{margin-bottom:4px}
+.no-results h3{font-size:17px;margin:0 0 6px}
+.no-results{font-size:14.5px;border-top:1px solid var(--govuk-border);padding-top:14px}
+.no-results ul{margin:6px 0 0;padding-left:20px;color:var(--govuk-secondary-text)}
+.no-results li{margin-bottom:4px}
+
+/* ============ Following ============ */
+.follow-group{margin:0 0 18px}
+.follow-group h3{
+  font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--govuk-secondary-text);margin:0 0 6px;
+}
+.follow-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--govuk-surface);
+  border:1px solid var(--govuk-border);border-bottom:none;
+  padding:10px 12px;font-size:15px;
+}
+.follow-item:last-child{border-bottom:1px solid var(--govuk-border)}
+.follow-item .fi-name{font-weight:700}
+.follow-item .fi-sub{font-size:13px;color:var(--govuk-secondary-text)}
+.follow-item .follow-btn{margin-left:auto;flex:none}
+.fi-text{min-width:0}
+
+/* ============ Profile / detail screens ============ */
+.profile-head{
+  background:var(--govuk-surface);
+  border-bottom:1px solid var(--govuk-border);
+  padding:18px 16px 16px;
+  border-top:6px solid var(--dept,var(--govuk-blue));
+}
+.profile-head .kicker{
+  font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--govuk-secondary-text);margin:0 0 4px;
+}
+.profile-head h2{font-size:25px;line-height:1.12;margin:0 0 4px;text-wrap:balance}
+.profile-head .sub{font-size:15px;color:var(--govuk-secondary-text);margin:0 0 12px}
+.profile-head .follow-btn{width:auto}
+
+.section{padding:16px}
+.section h3{
+  font-size:19px;margin:0 0 10px;
+  border-bottom:2px solid var(--govuk-blue);
+  padding-bottom:6px;
+}
+.summary-list{margin:0;display:block}
+.summary-list div{
+  display:flex;gap:12px;
+  border-bottom:1px solid var(--govuk-border-light);
+  padding:9px 0;font-size:14.5px;
+}
+.summary-list dt{flex:0 0 38%;color:var(--govuk-secondary-text);margin:0}
+.summary-list dd{margin:0;min-width:0}
+
+.mini-card{
+  background:var(--govuk-surface);
+  border:1px solid var(--govuk-border);
+  padding:11px 12px;margin:0 0 8px;
+}
+.mini-card h4{font-size:15px;margin:0 0 3px;line-height:1.3}
+.mini-card p{font-size:13.5px;color:var(--govuk-secondary-text);margin:0 0 4px}
+.mini-card .m-meta{font-size:12.5px;color:var(--govuk-secondary-text)}
+
+/* ============ Bottom navigation ============ */
+.bottom-nav{
+  position:absolute;bottom:0;left:0;right:0;z-index:20;
+  display:flex;
+  background:var(--govuk-surface);
+  border-top:1px solid var(--govuk-border);
+}
+.bnav{
+  flex:1;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 4px 10px;
+  font-size:11.5px;color:var(--govuk-secondary-text);
+  border-top:4px solid transparent;margin-top:-1px;
+  position:relative;border-radius:0;
+}
+.bnav[aria-current="page"]{
+  color:var(--govuk-blue);font-weight:700;
+  border-top-color:var(--govuk-blue);
+}
+.bnav svg{display:block}
+
+.divider-note{
+  text-align:center;font-size:12.5px;color:var(--govuk-secondary-text);
+  padding:6px 16px 18px;
+}
+</style>
+
+<div class="app">
+
+  <!-- ================= Header ================= -->
+  <header class="gov-header">
+    <div class="wordmark">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="10" width="20" height="11" fill="#fff"/>
+        <rect x="4.5" y="12.5" width="3" height="8.5" fill="var(--govuk-header)"/>
+        <rect x="10.5" y="12.5" width="3" height="8.5" fill="var(--govuk-header)"/>
+        <rect x="16.5" y="12.5" width="3" height="8.5" fill="var(--govuk-header)"/>
+        <path d="M12 2 L22 10 H2 Z" fill="#fff"/>
+      </svg>
+      <span>Your GOV.UK<span class="strap">UK Government &amp; Parliament</span></span>
+    </div>
+    <button class="settings-btn" aria-label="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </header>
+  <div class="phase">
+    <span class="tag">Beta</span>
+    <span>Prototype — everything shown is live from official open APIs: GOV.UK, Parliament, Environment Agency and council planning registers.</span>
+  </div>
+
+  <!-- ================= Onboarding ================= -->
+  <div id="onboarding">
+    <div class="onb-body">
+      <p class="onb-step">Set up your feed · Step 1 of 1</p>
+      <h2>What do you want to follow?</h2>
+      <p>Pick the topics you care about. Your GOV.UK will follow the right departments, ministers, Bills and consultations for you — you can change this any time.</p>
+
+      <div class="topic-grid" role="group" aria-label="Topics">
+        <button class="topic" aria-pressed="true"><span class="box"></span>Railways</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Science</button>
+        <button class="topic" aria-pressed="true"><span class="box"></span>Artificial Intelligence</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Defence</button>
+        <button class="topic" aria-pressed="true"><span class="box"></span>Planning</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Culture</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Heritage</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Broadband</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Space</button>
+        <button class="topic" aria-pressed="true"><span class="box"></span>Environment</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Housing</button>
+        <button class="topic" aria-pressed="false"><span class="box"></span>Local Government</button>
+      </div>
+
+      <label class="field-label" for="postcode">Your postcode <span style="font-weight:400;color:var(--govuk-secondary-text)">(optional)</span></label>
+      <p class="field-hint">Used to find your MP, council and local consultations. Stays on your device.</p>
+      <input class="text-input" id="postcode" inputmode="text" autocomplete="postal-code" value="YO24 1AB" style="max-width:180px">
+
+      <p class="onb-preview" id="onb-preview">Based on your choices, Your GOV.UK will follow the departments, Bills and consultations that lead on those topics, and your constituency.</p>
+
+      <div class="onb-actions">
+        <button class="govuk-button" id="onb-done">Build my feed</button>
+        <button class="govuk-button govuk-button--secondary" id="onb-skip">Skip for now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FEED ================= -->
+  <main id="screen-feed" class="screen active" aria-label="Your feed">
+    <div class="feed">
+
+      <!-- Your area: populated live after onboarding postcode -->
+      <div id="your-area">
+        <article class="card" style="--dept:var(--govuk-blue)">
+          <h3 style="font-size:17px;margin:0 0 6px">See what’s happening near you</h3>
+          <p class="summary" style="margin:0 0 12px">Add your postcode to see your MP, local planning applications and live flood alerts. Use Search to follow MPs, departments and consultations.</p>
+          <button class="govuk-button govuk-button--secondary" id="add-postcode" style="width:auto;margin:0;font-size:15px;padding:8px 14px">Add your postcode</button>
+        </article>
+      </div>
+
+      <!-- Live flood alert from the Environment Agency (hidden unless a real warning exists) -->
+      <div class="alert-banner" role="alert" id="flood-banner" hidden></div>
+
+    </div>
+        <p class="divider-note">Live from GOV.UK, Parliament, the Environment Agency and council planning registers</p>
+  </main>
+
+  <!-- ================= SEARCH ================= -->
+  <main id="screen-search" class="screen" aria-label="Search">
+    <div class="screen-inner">
+      <h2 class="screen-title">Search</h2>
+      <p class="screen-lede">Live search of MPs, Lords, ministers, departments, public bodies, consultations, publications and places.</p>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="Try “rail”, “Manchester”, or an MP’s name" aria-label="Search Your GOV.UK" autocomplete="off">
+        <button aria-label="Search" id="search-go">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      </div>
+      <div id="search-results" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <!-- ================= FOLLOWING ================= -->
+  <main id="screen-following" class="screen" aria-label="Following">
+    <div class="screen-inner">
+      <h2 class="screen-title">Following</h2>
+      <p class="screen-lede">Everything shaping your feed. Unfollow anything, any time.</p>
+
+      <div id="dyn-follows"></div>
+
+    </div>
+  </main>
+
+    <!-- ================= ALERTS ================= -->
+  <main id="screen-alerts" class="screen" aria-label="Alerts">
+    <div class="screen-inner">
+      <h2 class="screen-title">Alerts</h2>
+      <p class="screen-lede">Things that happened to what you follow.</p>
+
+      <div class="search-hint" style="border-top:none;padding-top:0">
+        <strong>No alerts yet.</strong> Real-time alerts need the app&rsquo;s backend. Your &lsquo;Notify me when&hellip;&rsquo; choices are saved on this device and would drive these alerts in the full app.
+      </div>
+    </div>
+  </main>
+
+    <!-- ================= ENTITY DETAIL (rendered from search data) ================= -->
+  <main id="screen-entity" class="screen" aria-label="Details">
+    <div class="back-bar"><button class="back-link" data-go="screen-search">Back to search</button></div>
+    <div class="screen-inner" style="padding-top:8px">
+      <div class="profile-head" id="ent-head">
+        <p class="kicker" id="ent-kicker"></p>
+        <h2 id="ent-title"></h2>
+        <p class="sub" id="ent-sub"></p>
+        <button class="follow-btn" id="ent-follow" aria-pressed="false">Follow</button>
+      </div>
+      <div class="section">
+        <h3>Details</h3>
+        <dl class="summary-list" id="ent-details"></dl>
+        <details class="notify-details">
+          <summary>Notify me when…</summary>
+          <div class="notify-rows" id="ent-notify"></div>
+        </details>
+      </div>
+      <div class="section" style="padding-top:0">
+        <h3>Latest</h3>
+        <div id="ent-latest"></div>
+        <p style="font-size:14px;margin:10px 0 0"><a href="#" target="_blank" rel="noopener" id="ent-source">View official source</a></p>
+      </div>
+      <div class="section" style="padding-top:0" id="ent-votes-sec" hidden>
+        <h3>Recent votes</h3>
+        <div id="ent-votes"></div>
+        <p style="font-size:12.5px;color:var(--govuk-secondary-text);margin:6px 0 0">Live from the Commons Votes API · shown without commentary.</p>
+      </div>
+      <div class="section" style="padding-top:0" id="ent-contribs-sec" hidden>
+        <h3>Recent contributions</h3>
+        <div id="ent-contribs"></div>
+        <p style="font-size:12.5px;color:var(--govuk-secondary-text);margin:6px 0 0">Live from Parliament · links open the official Hansard record.</p>
+      </div>
+      <div class="section" style="padding-top:0" id="ent-channels-sec" hidden>
+        <h3>Official channels</h3>
+        <div id="ent-channels"></div>
+        <p style="font-size:12.5px;color:var(--govuk-secondary-text);margin:8px 0 0">Verified links from this organisation’s GOV.UK page.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= Bottom nav ================= -->
+  <nav class="bottom-nav" aria-label="Main">
+    <button class="bnav" data-screen="screen-feed" aria-current="page">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+      Feed
+    </button>
+    <button class="bnav" data-screen="screen-search">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      Search
+    </button>
+    <button class="bnav" data-screen="screen-following">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Following
+    </button>
+    <button class="bnav" data-screen="screen-alerts">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      Alerts
+    </button>
+  </nav>
+
+</div>
+
+<script>
+(function(){
+  var screens = document.querySelectorAll('.screen');
+  var navBtns = document.querySelectorAll('.bnav');
+
+  function show(id){
+    screens.forEach(function(s){ s.classList.toggle('active', s.id === id); });
+    navBtns.forEach(function(b){
+      if(b.dataset.screen === id){ b.setAttribute('aria-current','page'); }
+      else { b.removeAttribute('aria-current'); }
+    });
+    if(id === 'screen-following'){ renderDynamicFollows(); }
+    window.scrollTo({top:0});
+    var app = document.querySelector('.app');
+    if(app) app.scrollTop = 0;
+  }
+
+  navBtns.forEach(function(b){
+    b.addEventListener('click', function(){ show(b.dataset.screen); });
+  });
+
+  // Delegated: any element with data-go navigates; bare "#" links are inert (prototype)
+  document.addEventListener('click', function(e){
+    var go = e.target.closest('[data-go]');
+    if(go){ e.preventDefault(); show(go.dataset.go); return; }
+    var a = e.target.closest('a[href="#"]');
+    if(a){ e.preventDefault(); }
+  });
+
+  // ============ Follow state (shared across screens) ============
+  var followed = new Set();
+
+  function setFollowState(btn, on){
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.textContent = on ? 'Following' : (btn.dataset.off || 'Follow');
+  }
+
+  // Subtitles for followed entities, keyed by title
+  var entityInfo = {};
+
+  function renderDynamicFollows(){
+    var box = document.getElementById('dyn-follows');
+    box.textContent = '';
+    var extra = [];
+    followed.forEach(function(t){ extra.push(t); });
+    if(extra.length === 0){
+      box.innerHTML = '<p class="screen-lede">You are not following anything yet. Find MPs, departments, places and consultations in Search, or add your postcode to follow your area.</p>';
+      return;
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'follow-group';
+    var h = document.createElement('h3');
+    h.textContent = 'You follow';
+    wrap.appendChild(h);
+    extra.sort().forEach(function(t){
+      var info = entityInfo[t] || {};
+      var item = document.createElement('div');
+      item.className = 'follow-item';
+      var span = document.createElement('span');
+      span.className = 'fi-text';
+      var name = document.createElement('span');
+      name.className = 'fi-name';
+      name.textContent = t;
+      span.appendChild(name);
+      if(info.s){
+        span.appendChild(document.createElement('br'));
+        var sub = document.createElement('span');
+        sub.className = 'fi-sub';
+        sub.textContent = info.s;
+        span.appendChild(sub);
+      }
+      var btn = document.createElement('button');
+      btn.className = 'follow-btn';
+      btn.dataset.entity = t;
+      btn.dataset.off = 'Follow';
+      setFollowState(btn, true);
+      item.appendChild(span);
+      item.appendChild(btn);
+      wrap.appendChild(item);
+    });
+    box.appendChild(wrap);
+  }
+
+  // Delegated toggle: updates state, syncs duplicate buttons, persists — one pass
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.follow-btn');
+    if(!btn) return;
+    var on = btn.getAttribute('aria-pressed') !== 'true';
+    if(btn.dataset.entity){
+      if(on){ followed.add(btn.dataset.entity); } else { followed.delete(btn.dataset.entity); }
+      document.querySelectorAll('.follow-btn[data-entity]').forEach(function(b){
+        if(b.dataset.entity === btn.dataset.entity) setFollowState(b, on);
+      });
+      saveStore();
+    } else {
+      setFollowState(btn, on);
+    }
+  });
+
+  // Onboarding topics toggle + live preview of what will be followed
+  var onbPreview = document.getElementById('onb-preview');
+  function updateOnbPreview(){
+    var names = Array.prototype.map.call(document.querySelectorAll('.topic[aria-pressed="true"]'), function(t){ return t.textContent.trim(); });
+    onbPreview.textContent = '';
+    if(names.length === 0){
+      onbPreview.textContent = 'Pick at least one topic, or skip and follow things later.';
+      return;
+    }
+    var shown = names.slice(0,3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : '');
+    onbPreview.appendChild(document.createTextNode('Based on your choices, Your GOV.UK will follow '));
+    var b = document.createElement('strong');
+    b.textContent = shown;
+    onbPreview.appendChild(b);
+    onbPreview.appendChild(document.createTextNode(' — plus the departments, Bills and consultations that lead on ' + (names.length === 1 ? 'it' : 'them') + ', and your constituency.'));
+  }
+  document.querySelectorAll('.topic').forEach(function(t){
+    t.addEventListener('click', function(){
+      var on = t.getAttribute('aria-pressed') === 'true';
+      t.setAttribute('aria-pressed', on ? 'false' : 'true');
+      updateOnbPreview();
+    });
+  });
+  updateOnbPreview();
+
+  // ============ Search ============
+  var GROUP_ORDER = ['People','Ministers and officials','Departments and bodies','Consultations','GOV.UK publications and news','Places'];
+
+  var searchInput = document.getElementById('search-input');
+  var searchResults = document.getElementById('search-results');
+
+  function renderSearch(q, note){
+    q = (q || '').trim().toLowerCase();
+    searchResults.textContent = '';
+
+    if(!q){
+      var hint = document.createElement('div');
+      hint.className = 'search-hint';
+      hint.innerHTML = '<strong>Live search of GOV.UK and UK Parliament.</strong><ul>' +
+        '<li>An MP or peer by name — try a surname like “Smith”</li>' +
+        '<li>Your postcode — “SW1A 0AA” finds your MP and area</li>' +
+        '<li>A department or body — “Environment Agency”</li>' +
+        '<li>A topic — “rail”, “flooding”, “AI”</li></ul>';
+      searchResults.appendChild(hint);
+      return;
+    }
+
+    if(note){
+      var nb = document.createElement('p');
+      nb.className = 'search-note';
+      nb.textContent = note;
+      searchResults.appendChild(nb);
+      return;
+    }
+    renderHits([], q, null, null);
+  }
+
+  function renderHits(hits, q, note, label){
+    searchResults.textContent = '';
+    if(note){
+      var nb = document.createElement('p');
+      nb.className = 'search-note';
+      nb.textContent = note;
+      searchResults.appendChild(nb);
+    }
+    if(hits.length === 0){
+      var none = document.createElement('div');
+      none.className = 'no-results';
+      var h = document.createElement('h3');
+      h.textContent = 'No results for “' + q + '”';
+      var ul = document.createElement('ul');
+      ul.innerHTML = '<li>Check the spelling</li><li>Try a broader word — “rail” instead of “railway station”</li><li>Try a place name or postcode area</li>';
+      none.appendChild(h); none.appendChild(ul);
+      searchResults.appendChild(none);
+      return;
+    }
+
+    var count = document.createElement('p');
+    count.className = 'search-count';
+    count.textContent = hits.length + (hits.length === 1 ? ' result' : ' results') + ' for “' + q + '”' + (label ? ' — ' + label : '');
+    searchResults.appendChild(count);
+
+    GROUP_ORDER.forEach(function(group){
+      var inGroup = hits.filter(function(i){ return i.g === group; });
+      if(inGroup.length === 0) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'result-group';
+      var head = document.createElement('h3');
+      head.textContent = group;
+      wrap.appendChild(head);
+      inGroup.forEach(function(item){
+        var row = document.createElement('div');
+        row.className = 'result';
+        var open = document.createElement('button');
+        open.className = 'r-open';
+        var text = document.createElement('span');
+        text.className = 'r-text';
+        var title = document.createElement('span');
+        title.className = 'r-title';
+        title.textContent = item.t;
+        var sub = document.createElement('span');
+        sub.className = 'r-sub';
+        sub.textContent = item.s;
+        text.appendChild(title); text.appendChild(sub);
+        var go = document.createElement('span');
+        go.className = 'go';
+        go.textContent = '›';
+        open.appendChild(text); open.appendChild(go);
+        open.addEventListener('click', function(){ openEntity(item); });
+        var fb = document.createElement('button');
+        fb.className = 'follow-btn';
+        fb.dataset.entity = item.t;
+        fb.dataset.off = 'Follow';
+        entityInfo[item.t] = {s: item.s};
+        setFollowState(fb, followed.has(item.t));
+        row.appendChild(open);
+        row.appendChild(fb);
+        wrap.appendChild(row);
+      });
+      searchResults.appendChild(wrap);
+    });
+  }
+
+  // ============ Live search: GOV.UK Search API + Parliament Members API ============
+  // Bills, Hansard and Committees APIs do not send CORS headers, so a browser
+  // cannot query them directly; a production app would proxy them server-side.
+  var searchSeq = 0, searchTimer = null, searchAbort = null;
+
+  function fmtDate(iso){
+    if(!iso) return '';
+    var d = new Date(iso);
+    if(isNaN(d)) return '';
+    return d.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  }
+  function trunc(s, n){ s = s || ''; return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/,'') + '…' : s; }
+  function docLabel(dt){
+    dt = (dt || 'page').replace(/_/g, ' ');
+    return dt.charAt(0).toUpperCase() + dt.slice(1);
+  }
+  function fetchJson(url, signal){
+    return fetch(url, {signal: signal}).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+  // Session cache for idempotent GETs (entity synopsis/channels re-opened repeatedly)
+  var apiCache = {};
+  function cachedJson(url){
+    return apiCache[url] ? Promise.resolve(apiCache[url])
+      : fetchJson(url).then(function(j){ apiCache[url] = j; return j; });
+  }
+
+  function mapMember(m){
+    var hm = m.latestHouseMembership || {};
+    var lords = hm.house === 2;
+    var party = m.latestParty ? m.latestParty.name : '';
+    return {
+      g:'People',
+      t: m.nameDisplayAs,
+      s: (party ? party + ' · ' : '') + (hm.membershipFrom || (lords ? 'House of Lords' : 'House of Commons')),
+      live: true,
+      memberId: m.id,
+      url: 'https://members.parliament.uk/member/' + m.id,
+      kicker: lords ? 'Member of the House of Lords' : 'Member of Parliament',
+      color: lords ? 'var(--dept-lords)' : 'var(--dept-commons)',
+      source: 'View profile on members.parliament.uk',
+      d: [
+        ['Party', party || '—'],
+        [lords ? 'Peerage' : 'Constituency', hm.membershipFrom || '—'],
+        ['Member since', fmtDate(hm.membershipStartDate) || '—']
+      ],
+      latest: [{h:'Speeches, votes, questions and committee work', m:'Open the official profile for the full record'}]
+    };
+  }
+
+  function searchMembers(q, signal){
+    return fetchJson('https://members-api.parliament.uk/api/Members/Search?Name=' + encodeURIComponent(q) + '&IsCurrentMember=true&take=6', signal)
+      .then(function(data){
+        return (data.items || []).map(function(row){ return mapMember(row.value); });
+      });
+  }
+
+  // Constituency name -> sitting MP (as a mapped entity item), or null
+  function fetchMPForConstituency(name, signal){
+    return fetchJson('https://members-api.parliament.uk/api/Location/Constituency/Search?searchText=' + encodeURIComponent(name) + '&take=1', signal)
+      .then(function(cs){
+        var c = cs.items && cs.items[0] && cs.items[0].value;
+        var mem = c && c.currentRepresentation && c.currentRepresentation.member && c.currentRepresentation.member.value;
+        return mem ? mapMember(mem) : null;
+      });
+  }
+
+  // Full UK postcode -> constituency, council and sitting MP
+  var POSTCODE_RE = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
+  function searchPostcode(q, signal){
+    if(!POSTCODE_RE.test(q)) return Promise.resolve([]);
+    return fetchJson('https://api.postcodes.io/postcodes/' + encodeURIComponent(q.replace(/\s+/g, '')), signal)
+      .then(function(res){
+        var p = res.result;
+        var items = [{
+          g:'Places', t: p.parliamentary_constituency, live: true,
+          s: 'Constituency for ' + p.postcode + ' · ' + (p.admin_district || ''),
+          kicker:'Constituency', color:'var(--dept-council)',
+          source:'Find constituencies on parliament.uk',
+          url:'https://members.parliament.uk/constituencies',
+          d: [
+            ['Postcode', p.postcode],
+            ['Council', p.admin_district || '—'],
+            ['Ward', p.admin_ward || '—'],
+            ['Region', p.region || p.country || '—']
+          ],
+          latest: [{h:'Planning applications, consultations and alerts for this area', m:'Would appear here in the full app'}]
+        }];
+        return fetchMPForConstituency(p.parliamentary_constituency, signal)
+          .then(function(mp){
+            if(mp){
+              mp.s = 'Your MP · ' + mp.s;
+              items.unshift(mp);
+            }
+            return items;
+          })
+          .catch(function(){ return items; });
+      });
+  }
+
+  function searchGovuk(q, signal, extra){
+    return fetchJson('https://www.gov.uk/api/search.json?q=' + encodeURIComponent(q) + extra, signal)
+      .then(function(data){ return data.results || []; });
+  }
+
+  function govukItem(r, group, kicker, color){
+    // 'format' carries the real content type; 'document_type' is always 'edition'
+    var dt = r.content_store_document_type || r.format || 'page';
+    var updated = fmtDate(r.public_timestamp);
+    return {
+      g: group,
+      t: r.title,
+      s: docLabel(dt) + (updated ? ' · updated ' + updated : ''),
+      live: true,
+      url: 'https://www.gov.uk' + r.link,
+      kicker: kicker,
+      color: color,
+      source: 'View on GOV.UK',
+      d: [
+        ['Type', docLabel(dt)],
+        ['Updated', updated || '—'],
+        ['Summary', trunc(r.description || 'No summary provided.', 280)]
+      ],
+      latest: [{h: trunc(r.description || r.title, 160), m: 'GOV.UK · gov.uk' + r.link}]
+    };
+  }
+
+  var CONSULT_TYPES = ['open_consultation','closed_consultation','consultation_outcome','consultation'];
+
+  function runSearch(qRaw){
+    var q = (qRaw || '').trim();
+    if(searchAbort){ searchAbort.abort(); searchAbort = null; }
+    if(q.length < 2){ renderSearch(q); return; }
+    var seq = ++searchSeq;
+    searchAbort = new AbortController();
+    var signal = searchAbort.signal;
+
+    searchResults.textContent = '';
+    var loading = document.createElement('p');
+    loading.className = 'search-count';
+    loading.textContent = 'Searching GOV.UK and Parliament…';
+    searchResults.appendChild(loading);
+
+    Promise.allSettled([
+      searchPostcode(q, signal),
+      searchMembers(q, signal),
+      searchGovuk(q, signal, '&count=5&filter_format=organisation').then(function(rs){
+        return rs.map(function(r){ return govukItem(r, 'Departments and bodies', 'Department or public body', 'var(--govuk-blue)'); });
+      }),
+      searchGovuk(q, signal, '&count=4&filter_format=person').then(function(rs){
+        return rs.map(function(r){ return govukItem(r, 'Ministers and officials', 'Minister or senior official', 'var(--govuk-blue)'); });
+      }),
+      searchGovuk(q, signal, '&count=4&filter_content_store_document_type=open_consultation').then(function(rs){
+        return rs.map(function(r){ return govukItem(r, 'Consultations', 'Open consultation', 'var(--dept-defra)'); });
+      }),
+      searchGovuk(q, signal, '&count=8').then(function(rs){
+        return rs
+          .filter(function(r){ var f = r.format || ''; return f !== 'organisation' && f !== 'person'; })
+          .map(function(r){
+            var dt = r.content_store_document_type || r.format || '';
+            if(CONSULT_TYPES.indexOf(dt) > -1){
+              return govukItem(r, 'Consultations', 'Consultation', 'var(--dept-defra)');
+            }
+            return govukItem(r, 'GOV.UK publications and news', 'GOV.UK content', 'var(--govuk-blue)');
+          });
+      })
+    ]).then(function(outcomes){
+      if(seq !== searchSeq) return; // superseded by a newer keystroke
+      var hits = [];
+      var failures = 0;
+      outcomes.forEach(function(o){
+        if(o.status === 'fulfilled'){ hits = hits.concat(o.value); }
+        else { failures++; }
+      });
+      var seen = {};
+      hits = hits.filter(function(h){
+        var key = h.g + '|' + h.t;
+        if(seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+      // The postcode probe resolves to [] for non-postcode queries, so it never
+      // counts as a live attempt — exclude it or a blocked host looks like "no results"
+      var attempted = POSTCODE_RE.test(q) ? outcomes.length : outcomes.length - 1;
+      if(failures >= attempted){
+        renderSearch(q, 'Live search is unavailable here — this host blocks external requests to GOV.UK and Parliament. Run the app on a normal host to search live.');
+        return;
+      }
+      renderHits(hits, q.toLowerCase(), null, 'live from GOV.UK and Parliament');
+      if(hits.length > 0){
+        var foot = document.createElement('p');
+        foot.className = 'search-note';
+        foot.textContent = 'Bills, Hansard debates and committees are not shown: those Parliament APIs don’t allow direct browser access, so a full app would fetch them through its own backend.';
+        searchResults.appendChild(foot);
+      }
+    });
+  }
+
+  searchInput.addEventListener('input', function(){
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function(){ runSearch(searchInput.value); }, 350);
+  });
+  document.getElementById('search-go').addEventListener('click', function(){
+    clearTimeout(searchTimer);
+    runSearch(searchInput.value);
+  });
+  renderSearch('');
+
+  // ============ Per-object notification rules (Gov Notify inside every object) ============
+  var NOTIFY_RULES = {
+    'People': ['Speaks in Parliament','Votes in a division','Asks or answers a written question'],
+    'Ministers and officials': ['Makes a statement','Gives a speech','Publishes on GOV.UK'],
+    'Departments and bodies': ['Publishes news or guidance','Opens a consultation','Releases statistics'],
+    'Consultations': ['Closing-soon reminder','Outcome published'],
+    'Places': ['Planning application opens nearby','Emergency alert issued','Local consultation opens'],
+    'default': ['Any new activity']
+  };
+  var notifyPrefs = {};
+
+  // ============ Entity detail page ============
+  function openEntity(item){
+    // every item producer sets these fields; the literal is just the fallback
+    var meta = Object.assign({
+      kicker: 'Overview',
+      color: 'var(--govuk-blue)',
+      source: 'View official source',
+      d: [['About', item.s]],
+      latest: []
+    }, item);
+    document.getElementById('ent-head').style.setProperty('--dept', meta.color);
+    document.getElementById('ent-kicker').textContent = meta.kicker + ' · live data';
+    document.getElementById('ent-title').textContent = item.t;
+    document.getElementById('ent-sub').textContent = item.s;
+
+    var fb = document.getElementById('ent-follow');
+    fb.dataset.entity = item.t;
+    fb.dataset.off = 'Follow';
+    setFollowState(fb, followed.has(item.t));
+
+    var dl = document.getElementById('ent-details');
+    dl.textContent = '';
+    meta.d.forEach(function(pair){
+      var div = document.createElement('div');
+      var dt = document.createElement('dt'); dt.textContent = pair[0];
+      var dd = document.createElement('dd'); dd.textContent = pair[1];
+      div.appendChild(dt); div.appendChild(dd); dl.appendChild(div);
+    });
+
+    var latest = document.getElementById('ent-latest');
+    latest.textContent = '';
+    meta.latest.forEach(function(it){
+      var card = document.createElement('div'); card.className = 'mini-card';
+      var h = document.createElement('h4'); h.textContent = it.h;
+      var m = document.createElement('span'); m.className = 'm-meta'; m.textContent = it.m;
+      card.appendChild(h); card.appendChild(m); latest.appendChild(card);
+    });
+
+    var rules = NOTIFY_RULES[item.g] || NOTIFY_RULES['default'];
+    var nb = document.getElementById('ent-notify');
+    nb.textContent = '';
+    rules.forEach(function(rule, i){
+      var lab = document.createElement('label');
+      lab.className = 'notify-row';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      var key = item.t + '|' + rule;
+      cb.checked = notifyPrefs.hasOwnProperty(key) ? notifyPrefs[key] : i === 0;
+      cb.addEventListener('change', function(){ notifyPrefs[key] = cb.checked; saveStore(); });
+      lab.appendChild(cb);
+      lab.appendChild(document.createTextNode(rule));
+      nb.appendChild(lab);
+    });
+
+    var src = document.getElementById('ent-source');
+    src.textContent = meta.source;
+    src.href = item.url || '#';
+
+    // For real GOV.UK organisations, pull verified social channels from the Content API
+    var chanSec = document.getElementById('ent-channels-sec');
+    chanSec.hidden = true;
+    document.getElementById('ent-votes-sec').hidden = true;
+    document.getElementById('ent-contribs-sec').hidden = true;
+    var orgMatch = item.live && item.url && item.url.match(/\/\/www\.gov\.uk(\/government\/organisations\/[a-z0-9-]+)$/);
+    if(orgMatch){
+      var CHAN_LABELS = {twitter:'X', youtube:'YouTube', instagram:'Instagram', linkedin:'LinkedIn', facebook:'Facebook', flickr:'Flickr', bluesky:'Bluesky', threads:'Threads', other:'Official'};
+      cachedJson('https://www.gov.uk/api/content' + orgMatch[1])
+        .then(function(org){
+          if(document.getElementById('ent-title').textContent !== item.t) return;
+          var links = (org.details && org.details.social_media_links) || [];
+          if(links.length === 0) return;
+          var box = document.getElementById('ent-channels');
+          box.textContent = '';
+          var seenSvc = {};
+          links.forEach(function(l){
+            if(seenSvc[l.service_type]) return; // one link per platform
+            seenSvc[l.service_type] = true;
+            var row = document.createElement('div');
+            row.className = 'chan-row';
+            var tag = document.createElement('span');
+            tag.className = 'tag tag--grey';
+            tag.textContent = CHAN_LABELS[l.service_type] || l.service_type;
+            var a = document.createElement('a');
+            a.href = l.href;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = l.title || 'Official ' + (CHAN_LABELS[l.service_type] || l.service_type) + ' account';
+            row.appendChild(tag);
+            row.appendChild(a);
+            box.appendChild(row);
+          });
+          chanSec.hidden = false;
+        })
+        .catch(function(){ /* channels are optional */ });
+    }
+
+    // For real members, pull the official one-paragraph synopsis
+    if(item.memberId){
+      cachedJson('https://members-api.parliament.uk/api/Members/' + item.memberId + '/Synopsis')
+        .then(function(res){
+          if(document.getElementById('ent-title').textContent !== item.t) return;
+          var txt = (res.value || '').replace(/<[^>]*>/g, '');
+          if(!txt) return;
+          var div = document.createElement('div');
+          var dt = document.createElement('dt'); dt.textContent = 'About';
+          var dd = document.createElement('dd'); dd.textContent = txt;
+          div.appendChild(dt); div.appendChild(dd);
+          document.getElementById('ent-details').appendChild(div);
+        })
+        .catch(function(){ /* synopsis is optional */ });
+
+      // Real voting record (Commons divisions; empty for Lords, section stays hidden)
+      cachedJson('https://commonsvotes-api.parliament.uk/data/divisions.json/membervoting?queryParameters.memberId=' + item.memberId + '&queryParameters.take=4')
+        .then(function(list){
+          if(document.getElementById('ent-title').textContent !== item.t) return;
+          if(!list || list.length === 0) return;
+          var box = document.getElementById('ent-votes');
+          box.textContent = '';
+          list.forEach(function(v){
+            var d = v.PublishedDivision || {};
+            var wrap = document.createElement('div');
+            wrap.className = 'vote';
+            var top = document.createElement('div');
+            top.className = 'v-label';
+            var title = document.createElement('span');
+            title.textContent = trunc(d.Title || 'Division ' + d.Number, 74);
+            var pos = document.createElement('strong');
+            pos.textContent = v.MemberVotedAye ? 'Aye' : (v.MemberVotedNo ? 'No' : 'Did not vote');
+            top.appendChild(title); top.appendChild(pos);
+            var bar = document.createElement('div');
+            bar.className = 'v-bar';
+            var fill = document.createElement('span');
+            var total = (d.AyeCount || 0) + (d.NoCount || 0);
+            fill.style.width = total ? Math.round((d.AyeCount || 0) / total * 100) + '%' : '0%';
+            bar.appendChild(fill);
+            var sub = document.createElement('div');
+            sub.className = 'v-label';
+            sub.style.cssText = 'margin-top:3px;font-size:12.5px;color:var(--govuk-secondary-text)';
+            var counts = document.createElement('span');
+            counts.textContent = 'Ayes ' + d.AyeCount + ' · Noes ' + d.NoCount + ' · ' + fmtDate(d.Date);
+            var a = document.createElement('a');
+            a.href = 'https://votes.parliament.uk/Votes/Commons/Division/' + d.DivisionId;
+            a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = 'Detail';
+            sub.appendChild(counts); sub.appendChild(a);
+            wrap.appendChild(top); wrap.appendChild(bar); wrap.appendChild(sub);
+            box.appendChild(wrap);
+          });
+          document.getElementById('ent-votes-sec').hidden = false;
+        })
+        .catch(function(){ /* votes are optional */ });
+
+      // Real recent contributions, deep-linked to Hansard
+      cachedJson('https://members-api.parliament.uk/api/Members/' + item.memberId + '/ContributionSummary?page=1')
+        .then(function(res){
+          if(document.getElementById('ent-title').textContent !== item.t) return;
+          var items = (res.items || []).slice(0, 4);
+          if(items.length === 0) return;
+          var box = document.getElementById('ent-contribs');
+          box.textContent = '';
+          items.forEach(function(row){
+            var c = row.value;
+            var kinds = [];
+            [['speechCount','speech','speeches'],['questionCount','question','questions'],
+             ['supplementaryQuestionCount','supplementary question','supplementary questions'],
+             ['interventionCount','intervention','interventions'],['answerCount','answer','answers'],
+             ['statementsCount','statement','statements'],['pointsOfOrderCount','point of order','points of order']]
+              .forEach(function(k){
+                var n = c[k[0]] || 0;
+                if(n > 0) kinds.push(n + ' ' + (n === 1 ? k[1] : k[2]));
+              });
+            var mc = document.createElement('div');
+            mc.className = 'mini-card';
+            var h4 = document.createElement('h4');
+            h4.textContent = c.debateTitle || c.section || 'Contribution';
+            var p = document.createElement('p');
+            p.textContent = (kinds.join(', ') || c.totalContributions + ' contributions') + ' · ' + (c.section || '');
+            var m = document.createElement('span');
+            m.className = 'm-meta';
+            m.appendChild(document.createTextNode((c.house || '') + ' · ' + fmtDate(c.sittingDate) + ' · '));
+            var a = document.createElement('a');
+            a.href = 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' + String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId + '/';
+            a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = 'Read in Hansard';
+            m.appendChild(a);
+            mc.appendChild(h4); mc.appendChild(p); mc.appendChild(m);
+            box.appendChild(mc);
+          });
+          document.getElementById('ent-contribs-sec').hidden = false;
+        })
+        .catch(function(){ /* contributions are optional */ });
+    }
+    show('screen-entity');
+  }
+
+  // ============ Persistence + your real area (postcode -> MP, floods, planning) ============
+  var store = {};
+
+  // Single source of truth: derives persisted follow state from live state,
+  // so callers only mutate `followed`/`entityInfo` and call saveStore().
+  function saveStore(){
+    store.notifyPrefs = notifyPrefs;
+    store.follows = [];
+    followed.forEach(function(t){
+      store.follows.push({t: t, s: (entityInfo[t] || {}).s || ''});
+    });
+    try { localStorage.setItem('yourgovuk-v1', JSON.stringify(store)); } catch(e){}
+  }
+
+  function resolveArea(pc){
+    fetchJson('https://api.postcodes.io/postcodes/' + encodeURIComponent(pc.replace(/\s+/g, '')))
+      .then(function(res){
+        var p = res.result;
+        var area = {postcode: p.postcode, constituency: p.parliamentary_constituency, council: p.admin_district, ward: p.admin_ward, region: p.region || p.country, lat: p.latitude, lng: p.longitude, mp: null};
+        return fetchMPForConstituency(area.constituency)
+          .then(function(mp){ area.mp = mp; return area; })
+          .catch(function(){ return area; });
+      })
+      .then(function(area){
+        store.area = area;
+        if(area.mp){
+          followed.add(area.mp.t);
+          entityInfo[area.mp.t] = {s: 'Your MP · ' + area.mp.s};
+        }
+        if(area.constituency){
+          followed.add(area.constituency);
+          entityInfo[area.constituency] = {s: 'Your constituency · ' + (area.council || '')};
+        }
+        saveStore();
+        renderYourArea(area);
+        fetchLocal(area);
+      })
+      .catch(function(){ /* lookup failed; keep illustrative content */ });
+  }
+
+  function renderYourArea(area){
+    var box = document.getElementById('your-area');
+    box.textContent = '';
+    var card = document.createElement('article');
+    card.className = 'card';
+    card.style.setProperty('--dept', 'var(--dept-council)');
+    card.innerHTML =
+      '<div class="card-src"><span class="badge" aria-hidden="true">You</span>' +
+      '<span class="src-text"><span class="src-name"></span><br>' +
+      '<span class="src-meta">Live · postcodes.io and parliament.uk</span></span>' +
+      '<span class="card-type">Your area</span></div>' +
+      '<h3></h3><p class="summary"></p>' +
+      '<div class="card-foot"><a class="src-link" href="#"></a></div>';
+    card.querySelector('.src-name').textContent = 'Your area · ' + area.postcode;
+    card.querySelector('h3').textContent = area.constituency || area.council || area.postcode;
+    card.querySelector('.summary').textContent =
+      (area.mp ? 'Your MP is ' + area.mp.t + ' (' + area.mp.s + '). ' : '') +
+      'Council: ' + (area.council || '—') + ' · Ward: ' + (area.ward || '—') + '.';
+    var link = card.querySelector('.src-link');
+    if(area.mp){
+      link.textContent = 'View your MP’s profile';
+      link.addEventListener('click', function(e){ e.preventDefault(); openEntity(area.mp); });
+      var fb = document.createElement('button');
+      fb.className = 'follow-btn';
+      fb.dataset.entity = area.mp.t;
+      fb.dataset.off = 'Follow';
+      setFollowState(fb, followed.has(area.mp.t));
+      card.querySelector('.card-foot').appendChild(fb);
+    } else {
+      link.textContent = 'Find your MP on parliament.uk';
+      link.href = 'https://members.parliament.uk/members/commons';
+      link.target = '_blank'; link.rel = 'noopener';
+    }
+    box.appendChild(card);
+    var pl = document.createElement('div');
+    pl.id = 'your-planning';
+    box.appendChild(pl);
+  }
+
+  function fetchLocal(area){
+    // Real flood warnings from the Environment Agency (open API)
+    fetchJson('https://environment.data.gov.uk/flood-monitoring/id/floods?lat=' + area.lat + '&long=' + area.lng + '&dist=15')
+      .then(function(res){
+        var banner = document.getElementById('flood-banner');
+        var items = (res.items || []).filter(function(i){ return i.severityLevel <= 3; })
+          .sort(function(a, b){ return a.severityLevel - b.severityLevel; });
+        if(items.length === 0){ banner.hidden = true; return; }
+        var w = items[0];
+        banner.hidden = false;
+        banner.textContent = '';
+        var head = document.createElement('p');
+        head.className = 'alert-head';
+        head.textContent = (w.severityLevel <= 2 ? 'Flood warning' : 'Flood alert') + ' — your area · live';
+        var h = document.createElement('h3');
+        h.textContent = w.description || 'Flood alert near you';
+        var p = document.createElement('p');
+        p.textContent = trunc(w.message || 'Issued by the Environment Agency.', 180) + ' ';
+        var a = document.createElement('a');
+        a.href = 'https://check-for-flooding.service.gov.uk/';
+        a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Check flooding on GOV.UK';
+        p.appendChild(a);
+        banner.appendChild(head); banner.appendChild(h); banner.appendChild(p);
+      }).catch(function(){});
+
+    // Real planning applications from council registers via PlanIt (open API)
+    fetchJson('https://www.planit.org.uk/api/applics/json?krad=1.5&lat=' + area.lat + '&lng=' + area.lng + '&pg_sz=3&recent=120')
+      .then(function(res){
+        var recs = res.records || [];
+        var pl = document.getElementById('your-planning');
+        if(!pl || recs.length === 0) return;
+        pl.textContent = '';
+        var card = document.createElement('article');
+        card.className = 'card';
+        card.style.setProperty('--dept', 'var(--dept-council)');
+        card.innerHTML =
+          '<div class="card-src"><span class="badge" aria-hidden="true">PL</span>' +
+          '<span class="src-text"><span class="src-name"></span><br>' +
+          '<span class="src-meta">Live from council planning registers via PlanIt</span></span>' +
+          '<span class="card-type">Planning</span></div>';
+        card.querySelector('.src-name').textContent = 'Planning applications near ' + area.postcode;
+        recs.forEach(function(rec){
+          var mc = document.createElement('div');
+          mc.className = 'mini-card';
+          var h4 = document.createElement('h4');
+          h4.textContent = trunc(rec.description || rec.name, 90);
+          var pp = document.createElement('p');
+          pp.textContent = trunc(rec.address || '', 70);
+          var m = document.createElement('span');
+          m.className = 'm-meta';
+          m.appendChild(document.createTextNode((rec.area_name ? rec.area_name + ' · ' : '') + (rec.start_date || '') + ' · '));
+          var a = document.createElement('a');
+          a.href = rec.url || rec.link;
+          a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = 'View application';
+          m.appendChild(a);
+          mc.appendChild(h4); mc.appendChild(pp); mc.appendChild(m);
+          card.appendChild(mc);
+        });
+        pl.appendChild(card);
+      }).catch(function(){});
+  }
+
+  // Onboarding: close, persist, and resolve the postcode into a real area
+  document.getElementById('onb-done').addEventListener('click', function(){
+    document.getElementById('onboarding').classList.add('hidden');
+    store.onboarded = true;
+    store.topics = Array.prototype.map.call(document.querySelectorAll('.topic[aria-pressed="true"]'), function(t){ return t.textContent.trim(); });
+    var pc = document.getElementById('postcode').value.trim();
+    store.postcode = pc;
+    saveStore();
+    if(POSTCODE_RE.test(pc)) resolveArea(pc);
+  });
+  document.getElementById('onb-skip').addEventListener('click', function(){
+    document.getElementById('onboarding').classList.add('hidden');
+    store.onboarded = true;
+    saveStore();
+  });
+  var addPc = document.getElementById('add-postcode');
+  if(addPc) addPc.addEventListener('click', function(){
+    document.getElementById('onboarding').classList.remove('hidden');
+  });
+
+  // Restore saved state
+  try { store = JSON.parse(localStorage.getItem('yourgovuk-v1') || '{}') || {}; } catch(e){ store = {}; }
+  Object.assign(notifyPrefs, store.notifyPrefs || {});
+  (store.follows || []).forEach(function(f){
+    followed.add(f.t);
+    if(f.s) entityInfo[f.t] = {s: f.s};
+  });
+  if(store.topics){
+    document.querySelectorAll('.topic').forEach(function(t){
+      t.setAttribute('aria-pressed', store.topics.indexOf(t.textContent.trim()) > -1 ? 'true' : 'false');
+    });
+    updateOnbPreview();
+  }
+  if(store.postcode){ document.getElementById('postcode').value = store.postcode; }
+  if(store.onboarded){ document.getElementById('onboarding').classList.add('hidden'); }
+  if(store.area){ renderYourArea(store.area); fetchLocal(store.area); }
+})();
+</script>
