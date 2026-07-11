@@ -676,6 +676,34 @@ button{font-family:inherit}
       setTimeout(function(){ reject(new Error('timeout')); }, ms);
     })]);
   }
+  // ---- Hansard URL helpers (extracted verbatim by tests/hansard-url.test.html) ----
+  // Hansard 404s on a bare debate UUID, with or without a trailing slash: the
+  // debate-title slug is a required final path segment. It resolves by UUID, so
+  // any non-empty slug works, but we reproduce Hansard's own slug convention:
+  // word-initial letters capitalised, characters outside A-Za-z0-9()- dropped.
+  var HANSARD_DEBATE_RE = /^(https?:\/\/hansard\.parliament\.uk\/[^\/?#]+\/[^\/?#]+\/debates\/[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12})\/?([?#].*)?$/;
+  function hansardSlug(title){
+    return String(title || '')
+      .replace(/\s+(\S)/g, function(m, ch){ return ch.toUpperCase(); })
+      .replace(/[^A-Za-z0-9()\-]/g, '');
+  }
+  function hansardDebateUrl(c){
+    // The Members API supplies no ready-made URL, only the fields below.
+    return 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' +
+      String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId +
+      '/' + (hansardSlug(c.debateTitle || c.section) || 'Debate');
+  }
+  function repairHansardUrl(url, title){
+    // Backfills the slug on Hansard debate links saved while the app truncated
+    // them at the UUID. URLs that already end in a slug (the UUID is not the
+    // final segment), or that aren't Hansard debate links, pass through
+    // untouched — including their original path casing, query and fragment.
+    var m = HANSARD_DEBATE_RE.exec(String(url || ''));
+    if(!m) return url;
+    var slug = hansardSlug(title);
+    return slug ? m[1] + '/' + slug + (m[2] || '') : url;
+  }
+  // ---- end Hansard URL helpers ----
   function fmtDate(iso){
     if(!iso) return '';
     var d = new Date(iso);
@@ -1219,7 +1247,7 @@ button{font-family:inherit}
             m.className = 'm-meta';
             m.appendChild(document.createTextNode((c.house || '') + ' · ' + fmtDate(c.sittingDate) + ' · '));
             var a = document.createElement('a');
-            a.href = 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' + String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId + '/';
+            a.href = hansardDebateUrl(c);
             a.target = '_blank'; a.rel = 'noopener';
             a.textContent = 'Read in Hansard';
             m.appendChild(a);
@@ -1450,7 +1478,7 @@ button{font-family:inherit}
             type: 'Spoke in Parliament',
             title: c.debateTitle || c.section || 'Contribution in Parliament',
             sum: 'Your MP contributed in ' + (c.house || 'Parliament') + '. Open the Hansard record for the full transcript.',
-            url: 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' + String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId + '/',
+            url: hansardDebateUrl(c),
             ctx: 'Your MP', entity: a.mp, follow: a.mp.t
           }];
         }));
@@ -1756,7 +1784,7 @@ button{font-family:inherit}
           return {live:true, src:{badge:'MP', color:'var(--dept-commons)', photo: mpPhoto(a.mp.memberId)},
                   t: a.mp.t + ' spoke: ' + trunc(c.debateTitle || c.section || 'in Parliament', 70),
                   m: timeAgo(c.sittingDate) + ' · because ' + a.mp.t + ' is your MP',
-                  url: 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' + String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId + '/'};
+                  url: hansardDebateUrl(c)};
         }));
     }
     if(a && a.lat != null){
@@ -2001,6 +2029,16 @@ button{font-family:inherit}
   try { store = JSON.parse(localStorage.getItem('yourgovuk-demo-v1') || '{}') || {}; } catch(e){ store = {}; }
   Object.assign(notifyPrefs, store.notifyPrefs || {});
   Object.assign(savedItems, store.saved || {});
+  // Repair Hansard links saved before the debate-title slug fix: without the
+  // slug they 404. saveStore() below persists the repaired records.
+  Object.keys(savedItems).forEach(function(k){
+    var it = savedItems[k];
+    var fixed = repairHansardUrl(it.url, it.t);
+    if(fixed === it.url) return;
+    it.url = fixed;
+    delete savedItems[k];
+    savedItems[fixed] = it;
+  });
   (store.follows || []).forEach(function(f){
     followed.add(f.t);
     if(f.s) entityInfo[f.t] = {s: f.s};

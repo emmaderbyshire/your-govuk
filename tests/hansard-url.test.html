@@ -1,0 +1,152 @@
+<title>Hansard URL regression tests</title>
+<style>
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;max-width:860px;margin:24px auto;padding:0 16px;color:#0b0c0c}
+h1{font-size:24px}
+h2{font-size:17px;margin:28px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+td,th{border-bottom:1px solid #b1b4b6;padding:5px 8px;text-align:left;vertical-align:top}
+.pass{color:#00703c;font-weight:700}
+.fail{color:#d4351c;font-weight:700}
+#status{font-size:17px;font-weight:700}
+code{font-size:12.5px;word-break:break-all}
+</style>
+<h1>Hansard URL regression tests</h1>
+<p>Runs the <code>hansardSlug</code> / <code>hansardDebateUrl</code> / <code>repairHansardUrl</code>
+helpers extracted verbatim from each app file. Regression suite for
+<code>docs/bug-reports/2026-07-12-hansard-url-truncation.md</code>: Hansard 404s on a bare
+debate UUID, so the debate-title slug must survive into every link. Serve via
+<code>.claude/serve.ps1</code> and open <code>/tests/hansard-url.test.html</code>.</p>
+<p id="status">Running…</p>
+<div id="results"></div>
+<script>
+(function(){
+  var FILES = ['/demo.html', '/index.html', '/govfeed-prototype.html'];
+  var START = '// ---- Hansard URL helpers';
+  var END = '// ---- end Hansard URL helpers ----';
+
+  var UUID = '723FCBB0-C8A3-4D4F-84E0-733A51F1222A';
+  var BASE = 'https://hansard.parliament.uk/Commons/2026-07-09/debates/' + UUID;
+  var LORDS = 'https://hansard.parliament.uk/Lords/2026-07-09/debates/' + UUID;
+  var LOWER = 'https://hansard.parliament.uk/commons/2026-07-09/debates/' + UUID;
+  var TITLE = 'Israeli Settlements Trade Ban';
+  var SLUG = 'IsraeliSettlementsTradeBan';
+
+  // Each case: [name, function(h) -> actual, expected]
+  var CASES = [
+    ['builds Commons URL with the debate-title slug (bug-report example)', function(h){
+      return h.hansardDebateUrl({house:'Commons', sittingDate:'2026-07-09T00:00:00', debateWebsiteId:UUID, debateTitle:TITLE});
+    }, BASE + '/' + SLUG],
+    ['builds Lords URL with the debate-title slug', function(h){
+      return h.hansardDebateUrl({house:'Lords', sittingDate:'2026-07-09T00:00:00', debateWebsiteId:UUID, debateTitle:'Report Stage'});
+    }, LORDS + '/ReportStage'],
+    ['never emits a bare-UUID URL: falls back to section, then a placeholder', function(h){
+      return h.hansardDebateUrl({house:'Commons', sittingDate:'2026-07-09T00:00:00', debateWebsiteId:UUID});
+    }, BASE + '/Debate'],
+    ['slug ignores the leading whitespace the Members API includes in debateTitle', function(h){
+      return h.hansardSlug(' Holocaust Memorial Bill');
+    }, 'HolocaustMemorialBill'],
+    ['slug keeps parentheses and hyphens, drops other punctuation (Hansard convention)', function(h){
+      return h.hansardSlug('European Union (Withdrawal) Bill');
+    }, 'EuropeanUnion(Withdrawal)Bill'],
+    ['slug capitalises word-initial letters like Hansard does', function(h){
+      return h.hansardSlug('Business of the House');
+    }, 'BusinessOfTheHouse'],
+    ['slug keeps hyphenated terms intact', function(h){
+      return h.hansardSlug('Covid-19 Update');
+    }, 'Covid-19Update'],
+    ['repairs a saved record truncated with a trailing slash', function(h){
+      return h.repairHansardUrl(BASE + '/', TITLE);
+    }, BASE + '/' + SLUG],
+    ['repairs a saved record truncated without a trailing slash', function(h){
+      return h.repairHansardUrl(BASE, TITLE);
+    }, BASE + '/' + SLUG],
+    ['repairs Lords URLs', function(h){
+      return h.repairHansardUrl(LORDS + '/', 'Report Stage');
+    }, LORDS + '/ReportStage'],
+    ['does not assume the UUID is the final segment: slugged URL passes through', function(h){
+      return h.repairHansardUrl(BASE + '/' + SLUG, TITLE);
+    }, BASE + '/' + SLUG],
+    ['preserves mixed-case source paths without changing casing (lowercase commons)', function(h){
+      return h.repairHansardUrl(LOWER + '/', TITLE);
+    }, LOWER + '/' + SLUG],
+    ['keeps query strings while inserting the slug', function(h){
+      return h.repairHansardUrl(BASE + '/?highlight=trade', TITLE);
+    }, BASE + '/' + SLUG + '?highlight=trade'],
+    ['keeps fragments while inserting the slug', function(h){
+      return h.repairHansardUrl(BASE + '#contribution-123', TITLE);
+    }, BASE + '/' + SLUG + '#contribution-123'],
+    ['slugged URL with a fragment passes through untouched', function(h){
+      return h.repairHansardUrl(BASE + '/' + SLUG + '#contribution-123', TITLE);
+    }, BASE + '/' + SLUG + '#contribution-123'],
+    ['non-Hansard URLs pass through untouched (trailing slash kept)', function(h){
+      return h.repairHansardUrl('https://www.gov.uk/government/news/example/', 'Example');
+    }, 'https://www.gov.uk/government/news/example/'],
+    ['leaves a truncated URL alone when no title is known (never guesses a slug)', function(h){
+      return h.repairHansardUrl(BASE + '/', '');
+    }, BASE + '/']
+  ];
+
+  function loadHelpers(src, file){
+    var a = src.indexOf(START), b = src.indexOf(END);
+    if(a < 0 || b < 0) throw new Error('helper markers not found in ' + file);
+    return new Function(src.slice(a, b) +
+      '\nreturn {hansardSlug: hansardSlug, hansardDebateUrl: hansardDebateUrl, repairHansardUrl: repairHansardUrl};')();
+  }
+
+  var results = document.getElementById('results');
+  var totalPass = 0, totalFail = 0;
+
+  function runFile(file, src){
+    var h2 = document.createElement('h2');
+    h2.textContent = file;
+    results.appendChild(h2);
+    var table = document.createElement('table');
+    table.innerHTML = '<tr><th style="width:44px"></th><th>Case</th><th>Result</th></tr>';
+    var h = loadHelpers(src, file);
+    var fileCases = CASES.concat([
+      ['source contains no remaining truncated Hansard URL construction', function(){
+        return /debateWebsiteId \+ '\/'\s*[;,}]/.test(src) ? 'old truncating pattern still present' : 'clean';
+      }, 'clean']
+    ]);
+    fileCases.forEach(function(c){
+      var tr = document.createElement('tr');
+      var actual, ok;
+      try { actual = c[1](h); ok = actual === c[2]; }
+      catch(e){ actual = 'threw: ' + e.message; ok = false; }
+      if(ok){ totalPass++; } else { totalFail++; }
+      var mark = document.createElement('td');
+      mark.className = ok ? 'pass' : 'fail';
+      mark.textContent = ok ? 'PASS' : 'FAIL';
+      var name = document.createElement('td');
+      name.textContent = c[0];
+      var out = document.createElement('td');
+      var code = document.createElement('code');
+      code.textContent = ok ? String(actual) : 'expected ' + c[2] + ' but got ' + actual;
+      out.appendChild(code);
+      tr.appendChild(mark); tr.appendChild(name); tr.appendChild(out);
+      table.appendChild(tr);
+    });
+    results.appendChild(table);
+  }
+
+  Promise.all(FILES.map(function(f){
+    return fetch(f).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status + ' fetching ' + f);
+      return r.text();
+    });
+  })).then(function(sources){
+    FILES.forEach(function(f, i){ runFile(f, sources[i]); });
+    var status = document.getElementById('status');
+    status.textContent = totalFail === 0
+      ? 'All ' + totalPass + ' checks passed (' + FILES.length + ' files)'
+      : totalFail + ' of ' + (totalPass + totalFail) + ' checks FAILED';
+    status.style.color = totalFail === 0 ? '#00703c' : '#d4351c';
+    document.title = (totalFail === 0 ? 'PASS' : 'FAIL') + ' - Hansard URL regression tests';
+  }).catch(function(e){
+    var status = document.getElementById('status');
+    status.textContent = 'Could not run: ' + e.message;
+    status.style.color = '#d4351c';
+    document.title = 'FAIL - Hansard URL regression tests';
+  });
+})();
+</script>

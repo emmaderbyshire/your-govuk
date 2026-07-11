@@ -944,6 +944,34 @@ button{font-family:inherit}
     return apiCache[url] ? Promise.resolve(apiCache[url])
       : fetchJson(url).then(function(j){ apiCache[url] = j; return j; });
   }
+  // ---- Hansard URL helpers (extracted verbatim by tests/hansard-url.test.html) ----
+  // Hansard 404s on a bare debate UUID, with or without a trailing slash: the
+  // debate-title slug is a required final path segment. It resolves by UUID, so
+  // any non-empty slug works, but we reproduce Hansard's own slug convention:
+  // word-initial letters capitalised, characters outside A-Za-z0-9()- dropped.
+  var HANSARD_DEBATE_RE = /^(https?:\/\/hansard\.parliament\.uk\/[^\/?#]+\/[^\/?#]+\/debates\/[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12})\/?([?#].*)?$/;
+  function hansardSlug(title){
+    return String(title || '')
+      .replace(/\s+(\S)/g, function(m, ch){ return ch.toUpperCase(); })
+      .replace(/[^A-Za-z0-9()\-]/g, '');
+  }
+  function hansardDebateUrl(c){
+    // The Members API supplies no ready-made URL, only the fields below.
+    return 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' +
+      String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId +
+      '/' + (hansardSlug(c.debateTitle || c.section) || 'Debate');
+  }
+  function repairHansardUrl(url, title){
+    // Backfills the slug on Hansard debate links saved while the app truncated
+    // them at the UUID. URLs that already end in a slug (the UUID is not the
+    // final segment), or that aren't Hansard debate links, pass through
+    // untouched — including their original path casing, query and fragment.
+    var m = HANSARD_DEBATE_RE.exec(String(url || ''));
+    if(!m) return url;
+    var slug = hansardSlug(title);
+    return slug ? m[1] + '/' + slug + (m[2] || '') : url;
+  }
+  // ---- end Hansard URL helpers ----
 
   function mapMember(m){
     var hm = m.latestHouseMembership || {};
@@ -1318,7 +1346,7 @@ button{font-family:inherit}
             m.className = 'm-meta';
             m.appendChild(document.createTextNode((c.house || '') + ' · ' + fmtDate(c.sittingDate) + ' · '));
             var a = document.createElement('a');
-            a.href = 'https://hansard.parliament.uk/' + (c.house || 'Commons') + '/' + String(c.sittingDate || '').slice(0, 10) + '/debates/' + c.debateWebsiteId + '/';
+            a.href = hansardDebateUrl(c);
             a.target = '_blank'; a.rel = 'noopener';
             a.textContent = 'Read in Hansard';
             m.appendChild(a);
